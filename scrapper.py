@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import requests
 from bs4 import BeautifulSoup
 
@@ -18,22 +19,20 @@ class CrawlerField(object):
 
 
 class CrawlerItem(object):
-    response = None
-
     def __init__(self, url):
-        self.response = requests.get(url)
-        self.content = BeautifulSoup(self.response.content)
+        self._response = requests.get(url)
+        self._content = BeautifulSoup(self._response.content)
 
         for attr_name in dir(self):
             field = getattr(self, attr_name)
             if isinstance(field, CrawlerField):
                 try:
-                    value = self.content.select(field.selector)[0].text
+                    value = self._content.select(field.selector)[0].string
                 except IndexError:
                     value = None
 
                 if field.callback:
-                    value = field.callback(value, self.response)
+                    value = field.callback(value, self._response)
 
                 field.value = value
 
