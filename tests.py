@@ -101,7 +101,7 @@ class TestCrawlerItem(unittest.TestCase):
                                  '<h1>Test A1</h1></body></html>'
 
             crawler_item = TestCrawlerClass('http://dummy.org')
-        print('test_simple_selection', crawler_item._content)
+
         self.assertEqual(
             str(crawler_item.title),
             'Test A1',
@@ -272,3 +272,7 @@ class TestFetchDataFunction(unittest.TestCase):
         self.assertGreaterEqual(delta, scrapper.FETCH_DATA_DELAY)
 
         scrapper.FETCH_DATA_DELAY = old_delay
+
+
+if __name__ == '__main__':
+    unittest.main()

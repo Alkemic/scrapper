@@ -22,6 +22,10 @@ class ScrapperException(Exception):
     pass
 
 
+class ScrapperCantFindNext(ScrapperException):
+    pass
+
+
 def fetch_data(url):
     if not hasattr(fetch_data, 'last_run'):
         setattr(fetch_data, 'last_run', None)
@@ -193,9 +197,18 @@ class CrawlerItemSet(object):
         if self.next_selector:
             while True:
                 if isinstance(self.next_selector, tuple):
-                    next_link = soup.find_all(*self.next_selector)[0]
+                    selected_next = soup.find_all(*self.next_selector)
                 else:
-                    next_link = soup.select(self.next_selector)[0]
+                    selected_next = soup.find_all(self.next_selector)
+
+                if len(selected_next) == 0:
+                    raise ScrapperCantFindNext(
+                        'Couldn\'t find element by selector "{}"'.format(
+                            self.next_selector
+                        )
+                    )
+
+                next_link = selected_next[0]
 
                 if self.base_url in next_link.attrs['href']:
                     next_url = next_link.attrs['href']

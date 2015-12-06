@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-import sys
-sys.path.append('..')
-
 import scrapper
 
 
@@ -34,6 +31,6 @@ scrapper.FETCH_DATA_DELAY = 2
 i = 1
 for item_set in RedditFrontPageCollection():
     for item in item_set:
-        print("page: %d, title: %s" % (i, item.title))
+        print("page: %d, title: %s (%s)" % (i, item.title, item.link))
 
     i += 1
