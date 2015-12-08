@@ -36,9 +36,8 @@ links = [
     '/dp/B004WNAYS4/',
 ]
 
-for link in links:
-    product = AmazonEntry(link)
-
+products = [AmazonEntry(link) for link in links]
+for product in products:
     print 'title: %s\nprice: %s\nimg:%s' % (
         product.title, product.price, product.img,
     )
