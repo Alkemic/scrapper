@@ -10,7 +10,7 @@ setup(
     author='Daniel Alkemic Czuba',
     author_email='alkemic7@gmail.com',
     description='Scrapper is small, Python web scrapping library',
-    py_modules = ['scrapper'],
+    py_modules=['scrapper'],
     keywords='scrapper,webscrapping',
     install_requires=[
         'beautifulsoup4==4.3.2',
