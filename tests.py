@@ -8,7 +8,7 @@ import requests
 import scrapper
 
 
-def patch_requests_get():
+def monkey_patch_requests_get():
     def monkey_patch_get(uri, *args, **kwargs):
         extra_dict = {
             'content': open('./fixtures/%s' % uri).read(),
@@ -24,10 +24,13 @@ def patch_requests_get():
     setattr(requests, 'get', monkey_patch_get)
 
 
-patch_requests_get()
+class BaseTestCase(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        monkey_patch_requests_get()
 
 
-class TestCrawlerField(unittest.TestCase):
+class TestCrawlerField(BaseTestCase):
     def test_raises_exception(self):
         with self.assertRaises(ValueError):
             scrapper.CrawlerField()
@@ -53,7 +56,7 @@ class TestCrawlerField(unittest.TestCase):
         self.assertEqual('CrawlerField(\'h1\', None, False)', repr(field))
 
 
-class TestCrawlerItem(unittest.TestCase):
+class TestCrawlerItem(BaseTestCase):
     def test_deepcopy(self):
         class TestCrawlerClass(scrapper.CrawlerItem):
             title = scrapper.CrawlerField('h1')
@@ -158,7 +161,7 @@ class TestCrawlerItem(unittest.TestCase):
         )
 
 
-class TestCrawlerMultiItem(unittest.TestCase):
+class TestCrawlerMultiItem(BaseTestCase):
     def test_should_throw_exception(self):
         with self.assertRaises(scrapper.ScrapperException):
             scrapper.CrawlerMultiItem(None)
@@ -202,7 +205,7 @@ class TestCrawlerMultiItem(unittest.TestCase):
         ])
 
 
-class TestCrawlerItemSet(unittest.TestCase):
+class TestCrawlerItemSet(BaseTestCase):
     def test_raises_exception(self):
         with self.assertRaises(scrapper.ScrapperException):
             scrapper.CrawlerItemSet()
@@ -241,7 +244,7 @@ class TestCrawlerItemSet(unittest.TestCase):
         )
 
 
-class TestFetchDataFunction(unittest.TestCase):
+class TestFetchDataFunction(BaseTestCase):
     def test_raises_exception(self):
         with patch('requests.get') as mock:
             mocked_get = mock.return_value
