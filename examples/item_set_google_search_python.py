@@ -21,16 +21,14 @@ class SearchEntryCollection(scrapper.CrawlerMultiItem):
 
 class SearchPageItemSet(scrapper.CrawlerItemSet):
     url = 'https://www.google.pl/search?q=python'
-    base_url = 'http://www.reddit.com/'
+    base_url = 'https://www.google.pl/'
     item_class = SearchEntryCollection
-    # next_selector = ('a', {'rel': 'next'})
-    next_selector = 'a', {'class': 'pn'}
+    next_selector = 'a', {'id': 'pnnext'}
 
-
-scrapper.FETCH_DATA_DELAY = 2
 
 i = 1
-for item_set in SearchPageItemSet():
+items_set = SearchPageItemSet()
+for item_set in items_set:
     for item in item_set:
         print("page: %d, title: %s (%s)" % (i, item.title, item.link))
 

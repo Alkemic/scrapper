@@ -17,7 +17,7 @@ class AmazonEntry(scrapper.CrawlerItem):
     title = scrapper.CrawlerField('#productTitle')
     price = scrapper.CrawlerField(
         'div.feature span.a-color-price',
-        lambda value, content, response: value.strip(),
+        lambda value, _, __: value.strip(),
     )
     img = scrapper.CrawlerField(
         '#imgTagWrapperId img.a-dynamic-image',
