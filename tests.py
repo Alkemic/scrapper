@@ -41,15 +41,15 @@ class TestCrawlerField(BaseTestCase):
         self.assertEqual(field.selector, 'h1')
         self.assertEqual(field.full_tag, False)
         self.assertEqual(field.callback, None)
-        self.assertEqual(field.value, None)
-        self.assertEqual(field.__str__(), '')
+        self.assertEqual(field._value, None)
+        self.assertEqual(field.__get__(None), None)
 
-    def test_returned_value_must_be_unicode(self):
+    def test_returned_value_must_be_exact(self):
         field = scrapper.CrawlerField('h1')
-        field.value = 1234
+        field._value = 1234
 
-        self.assertEqual(field.__str__(), '1234')
-        self.assertEqual(type(field.__str__()), unicode)
+        self.assertEqual(str(field.__get__(None)), '1234')
+        self.assertEqual(type(field.__get__(None)), int)
 
     def test_repr(self):
         field = scrapper.CrawlerField('h1')
@@ -72,7 +72,7 @@ class TestCrawlerItem(BaseTestCase):
 
         item = TestCrawlerClass('single_entry.html')
 
-        self.assertIsNone(item.title.value)
+        self.assertIsNone(item.title)
 
     def test_proper_initialization(self):
         with patch('requests.get') as mock:
@@ -106,7 +106,7 @@ class TestCrawlerItem(BaseTestCase):
             crawler_item = TestCrawlerClass('http://dummy.org')
 
         self.assertEqual(
-            str(crawler_item.title),
+            crawler_item.title,
             'Test A1',
         )
 
@@ -134,20 +134,16 @@ class TestCrawlerItem(BaseTestCase):
             crawler_item = TestCrawlerClass('http://dummy.org')
 
         self.assertEqual(
-            str(crawler_item.title),
-            'Title',
+            crawler_item.title, 'Title',
         )
         self.assertEqual(
-            str(crawler_item.author),
-            'Author field',
+            crawler_item.author, 'Author field',
         )
         self.assertEqual(
-            str(crawler_item.author_email),
-            'author@example',
+            crawler_item.author_email, 'author@example',
         )
         self.assertEqual(
-            str(crawler_item.content),
-            'Lorem ipsum',
+            crawler_item.content, 'Lorem ipsum',
         )
 
         self.assertEqual(
@@ -194,7 +190,7 @@ class TestCrawlerMultiItem(BaseTestCase):
 
         multi_item = TestClassCrawlerMultiItem('page_1.html')
         items = [item for item in multi_item]
-        items_names = [item.name.value for item in items]
+        items_names = [item.name for item in items]
 
         self.assertEqual(len(items), 4)
         self.assertEqual(items_names, [
@@ -236,7 +232,7 @@ class TestCrawlerItemSet(BaseTestCase):
         items = [item for item in item_set]
 
         self.assertEqual(len(items), 3)
-        items_title = [str(item.title) for item in items]
+        items_title = [item.title for item in items]
 
         self.assertEqual(
             items_title,

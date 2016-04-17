@@ -61,6 +61,20 @@ def fetch_data(url):
     return response
 
 
+def select_content(selector, content, response, full_tag=False, callback=None):
+    try:
+        value = content.select(selector)[0]
+        if not full_tag:
+            value = value.string
+    except IndexError:
+        value = None
+
+    if callback:
+        value = callback(value, content, response)
+
+    return value
+
+
 class CrawlerField(object):
     def __init__(self, selector='', callback=None, full_tag=False):
         if not selector:
@@ -70,13 +84,7 @@ class CrawlerField(object):
         self.selector = selector
         self.callback = callback
 
-        self.value = None
-
-    def __str__(self):
-        if not self.value:
-            return ''
-
-        return "%s" % self.value
+        self._value = None
 
     def __repr__(self):
         return '%s(\'%s\', %s, %s)' % (
@@ -86,26 +94,23 @@ class CrawlerField(object):
             self.full_tag,
         )
 
+    def __get__(self, instance, owner=None):
+        return self._value
+
+    def __set__(self, instance, value):
+        self._value = value
+
     def process(self, content, response):
-        try:
-            value = content.select(self.selector)[0]
-            if not self.full_tag:
-                value = value.string
-        except IndexError:
-            value = None
-
-        if self.callback:
-            value = self.callback(value, content, response)
-
-        self.value = value
+        self._value = select_content(
+            self.selector, content, response, self.full_tag, self.callback,
+        )
 
 
 class CrawlerItem(object):
     def __new__(cls, *args, **kwargs):
         cls._base_fields = {}
 
-        for attr_name in dir(cls):
-            field = getattr(cls, attr_name)
+        for attr_name, field in cls.__dict__.items():
             if isinstance(field, CrawlerField):
                 cls._base_fields[attr_name] = field
 
@@ -114,7 +119,7 @@ class CrawlerItem(object):
     def __init__(self, url, caller=None, content=None):
         self._caller = caller
         self._url = url
-        self._fields = copy.deepcopy(self._base_fields)
+        self.__dict__.update(copy.deepcopy(self._base_fields))
 
         if content is None:
             self._response = fetch_data(self._url)
@@ -123,20 +128,22 @@ class CrawlerItem(object):
             self._response = None
             self._content = BeautifulSoup(content)
 
-        for name, field in self._fields.items():
-            field.process(self._content, self._response)
+        for name, field in self.__dict__.items():
+            if isinstance(field, CrawlerField):
+                field.process(self._content, self._response)
 
     def __getattribute__(self, name):
-        if not name.startswith('_') and name in self._fields:
-            return self._fields[name]
+        if not name.startswith('_') and name in self.__dict__:
+            return self.__dict__[name].__get__(self)
 
         return super(CrawlerItem, self).__getattribute__(name)
 
     def as_dict(self):
         return {
-            name: field.value
+            name: getattr(self, name)
             for name, field
-            in self._fields.items()
+            in self.__dict__.items()
+            if isinstance(field, CrawlerField)
         }
 
 
