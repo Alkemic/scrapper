@@ -244,8 +244,8 @@ class CrawlerItemSet(object):
                 if not REGEXP_LINK.match(next_url):
                     next_url = self.base_url + next_url
 
-                soup = BeautifulSoup(self.content)
                 self.content = fetch_data(next_url).content
+                soup = BeautifulSoup(self.content)
 
                 yield self.item_class(next_url, self)
 
