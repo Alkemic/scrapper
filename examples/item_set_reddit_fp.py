@@ -28,9 +28,6 @@ class RedditItemSet(scrapper.CrawlerItemSet):
     next_selector = ('a', {'rel': 'next'})
 
 
-scrapper.FETCH_DATA_DELAY = .4
-
-
 def main():
     i = 1
     for item_set in RedditItemSet():

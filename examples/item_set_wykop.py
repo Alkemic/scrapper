@@ -26,8 +26,6 @@ class WykopItemSet(scrapper.CrawlerItemSet):
     links_selector = 'a', {'class': 'button'},
 
 
-scrapper.FETCH_DATA_DELAY = .4
-
 i = 1
 for item_set in WykopItemSet():
     for item in item_set:
