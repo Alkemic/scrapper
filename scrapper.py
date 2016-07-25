@@ -109,7 +109,7 @@ class CrawlerItem(object):
             if isinstance(field, CrawlerField):
                 cls._base_fields[attr_name] = field
 
-        return super(CrawlerItem, cls).__new__(cls, *args, **kwargs)
+        return super(CrawlerItem, cls).__new__(cls)
 
     def __init__(self, url, caller=None, content=None):
         self._caller = caller
@@ -118,10 +118,10 @@ class CrawlerItem(object):
 
         if content is None:
             self._response = fetch_data(self._url)
-            self._content = BeautifulSoup(self._response.content)
+            self._content = BeautifulSoup(self._response.content, "html.parser")
         else:
             self._response = None
-            self._content = BeautifulSoup(content)
+            self._content = BeautifulSoup(content, "html.parser")
 
         for name, field in self._fields.items():
             field.process(self._content, self._response)
@@ -169,7 +169,7 @@ class CrawlerMultiItem(object):
             self.content = content
 
     def __iter__(self):
-        soup = BeautifulSoup(self.content)
+        soup = BeautifulSoup(self.content, "html.parser")
         for content in soup.select(self.content_selector):
             yield self.item_class(self.url, self, str(content))
 
@@ -220,7 +220,7 @@ class CrawlerItemSet(object):
         self.content = self.response.content
 
     def __iter__(self):
-        soup = BeautifulSoup(self.content)
+        soup = BeautifulSoup(self.content, "html.parser")
         if self.next_selector:
             yield self.item_class(self.url, self, self.content)
             while True:
@@ -237,7 +237,7 @@ class CrawlerItemSet(object):
                 if not REGEXP_LINK.match(next_url):
                     next_url = self.base_url + next_url
 
-                soup = BeautifulSoup(self.content)
+                soup = BeautifulSoup(self.content, "html.parser")
                 self.content = fetch_data(next_url).content
 
                 yield self.item_class(next_url, self)

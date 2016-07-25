@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import unicode_literals
+
 import json
 
 import scrapper
@@ -14,7 +16,10 @@ def get_image(value, content, response):
 
 
 class AmazonEntry(scrapper.CrawlerItem):
-    title = scrapper.CrawlerField('#productTitle')
+    title = scrapper.CrawlerField(
+        '#productTitle',
+        lambda value, content, response: value.strip(),
+    )
     price = scrapper.CrawlerField(
         'div.feature span.a-color-price',
         lambda value, content, response: value.strip(),
@@ -38,6 +43,6 @@ links = [
 
 products = [AmazonEntry(link) for link in links]
 for product in products:
-    print 'title: %s\nprice: %s\nimg:%s' % (
+    print('title: {}\nprice: {}\nimg: {}'.format(
         product.title, product.price, product.img,
-    )
+    ))

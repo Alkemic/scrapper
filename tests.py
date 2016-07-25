@@ -1,3 +1,4 @@
+import sys
 import copy
 import unittest
 from mock import patch
@@ -49,7 +50,10 @@ class TestCrawlerField(BaseTestCase):
         field.value = 1234
 
         self.assertEqual(field.__str__(), '1234')
-        self.assertEqual(type(field.__str__()), unicode)
+        if sys.version_info > (3, 0):
+            self.assertEqual(type(field.__str__()), str)
+        else:
+            self.assertEqual(type(field.__str__()), unicode)
 
     def test_repr(self):
         field = scrapper.CrawlerField('h1')
