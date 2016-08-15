@@ -226,10 +226,11 @@ class CrawlerItemSet(object):
         self.response = fetch_data(self.url)
         self.content = self.response.content
 
-    def __iter__(self):
+    def next_link(self):
         soup = BeautifulSoup(self.content, "html.parser")
+
         if self.next_selector:
-            yield self.item_class(self.url, self, self.content)
+            yield self.url
             while True:
                 selected_next = soup.find_all(*self.next_selector)
                 if len(selected_next) == 0:
@@ -247,7 +248,7 @@ class CrawlerItemSet(object):
                 self.content = fetch_data(next_url).content
                 soup = BeautifulSoup(self.content, "html.parser")
 
-                yield self.item_class(next_url, self)
+                yield next_url
 
         if self.links_selector:
             selected_links = soup.find_all(*self.links_selector)
@@ -263,4 +264,8 @@ class CrawlerItemSet(object):
                 else:
                     link_url = self.base_url + link.attrs['href']
 
-                yield self.item_class(link_url, self)
+                yield link_url
+
+    def __iter__(self):
+        for next_link in self.next_link():
+            yield self.item_class(next_link, self)
