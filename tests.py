@@ -1,9 +1,11 @@
-import sys
+from __future__ import unicode_literals
+
 import copy
 import unittest
 from mock import patch
 from datetime import datetime
 
+import lxml.etree
 import requests
 
 import scrapper
@@ -17,7 +19,7 @@ def monkey_patch_requests_get():
         }
 
         return type(
-            'mocked_requests',
+            str('mocked_requests'),
             (object,),
             extra_dict
         )()
@@ -40,33 +42,26 @@ class TestCrawlerField(BaseTestCase):
         field = scrapper.CrawlerField('h1')
 
         self.assertEqual(field.selector, 'h1')
-        self.assertEqual(field.full_tag, False)
         self.assertEqual(field.callback, None)
         self.assertEqual(field._value, None)
         self.assertEqual(field.__get__(None), None)
 
     def test_returned_value_must_be_exact(self):
-        field = scrapper.CrawlerField('h1')
+        field = scrapper.CrawlerField('//h1/text()')
         field._value = 1234
-
-        # self.assertEqual(field.__str__(), '1234')
-        # if sys.version_info > (3, 0):
-        #     self.assertEqual(type(field.__str__()), str)
-        # else:
-        #     self.assertEqual(type(field.__str__()), unicode)
 
         self.assertEqual(str(field.__get__(None)), '1234')
         self.assertEqual(type(field.__get__(None)), int)
 
     def test_repr(self):
-        field = scrapper.CrawlerField('h1')
-        self.assertEqual('CrawlerField(\'h1\', None, False)', repr(field))
+        field = scrapper.CrawlerField('//h1/text()')
+        self.assertEqual('CrawlerField(\'//h1/text()\', None)', repr(field))
 
 
 class TestCrawlerItem(BaseTestCase):
     def test_deepcopy(self):
         class TestCrawlerClass(scrapper.CrawlerItem):
-            title = scrapper.CrawlerField('h1')
+            title = scrapper.CrawlerField('//h1/text()')
 
         item = TestCrawlerClass('single_entry.html')
         dup = copy.deepcopy(item)
@@ -75,7 +70,7 @@ class TestCrawlerItem(BaseTestCase):
 
     def test_unknown_selector(self):
         class TestCrawlerClass(scrapper.CrawlerItem):
-            title = scrapper.CrawlerField('h12')
+            title = scrapper.CrawlerField('//h12/text()')
 
         item = TestCrawlerClass('single_entry.html')
 
@@ -96,13 +91,13 @@ class TestCrawlerItem(BaseTestCase):
             mocked_get,
         )
         self.assertEqual(
-            str(crawler_item._content),
+            lxml.etree.tostring(crawler_item._content).decode(),
             '<html><body><h1>Test A1</h1></body></html>',
         )
 
     def test_simple_selection(self):
         class TestCrawlerClass(scrapper.CrawlerItem):
-            title = scrapper.CrawlerField('h1')
+            title = scrapper.CrawlerField('//h1/text()')
 
         with patch('requests.get') as mock:
             mocked_get = mock.return_value
@@ -119,17 +114,16 @@ class TestCrawlerItem(BaseTestCase):
 
     def test_simple_content(self):
         class TestCrawlerClass(scrapper.CrawlerItem):
-            title = scrapper.CrawlerField('div.wrap h1')
-            author = scrapper.CrawlerField('div.wrap a')
+            title = scrapper.CrawlerField('//div[@class="wrap"]/h1/text()')
+            author = scrapper.CrawlerField('//div[@class="wrap"]/a/text()')
             author_email = scrapper.CrawlerField(
-                'div.wrap a',
-                lambda value, content, response: value['href'].replace(
+                '//div[@class="wrap"]/a/@href',
+                lambda value, content, response: value.replace(
                     'emialto:', '',
                 ),
-                True,
             )
             content = scrapper.CrawlerField(
-                'div.wrap div.content',
+                '//div[@class="wrap"]/div[@class="content"]/text()',
                 lambda value, content, response: value.strip(),
             )
 
@@ -189,11 +183,11 @@ class TestCrawlerMultiItem(BaseTestCase):
 
     def test_creation(self):
         class TestClassCrawlerItem(scrapper.CrawlerItem):
-            name = scrapper.CrawlerField('h1')
+            name = scrapper.CrawlerField('//h1/text()')
 
         class TestClassCrawlerMultiItem(scrapper.CrawlerMultiItem):
             item_class = TestClassCrawlerItem
-            content_selector = 'div.entry'
+            content_selector = '//div[@class="entry"]'
 
         multi_item = TestClassCrawlerMultiItem('page_1.html')
         items = [item for item in multi_item]
@@ -227,13 +221,13 @@ class TestCrawlerItemSet(BaseTestCase):
 
     def test_initialisation(self):
         class TestCrawlerClass(scrapper.CrawlerItem):
-            title = scrapper.CrawlerField('h1')
+            title = scrapper.CrawlerField('//h1/text()')
 
         class TestCrawlerItemSet(scrapper.CrawlerItemSet):
             base_url = ''
             url = 'page_index.html'
             item_class = TestCrawlerClass
-            links_selector = 'a'
+            links_selector = '//a/@href'
 
         item_set = TestCrawlerItemSet()
         items = [item for item in item_set]

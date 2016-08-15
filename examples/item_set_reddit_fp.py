@@ -6,26 +6,22 @@ import scrapper
 
 class RedditEntry(scrapper.CrawlerItem):
     title = scrapper.CrawlerField(
-        'p.title > a',
+        '//p[@class="title"]/a/text()',
         lambda value, content, response: value.strip() if value else None,
     )
-    link = scrapper.CrawlerField(
-        'p.title > a',
-        lambda value, content, response: value['href'] if value else None,
-        True,
-    )
+    link = scrapper.CrawlerField('//p[@class="title"]/a/@href')
 
 
 class RedditEntries(scrapper.CrawlerMultiItem):
     item_class = RedditEntry
-    content_selector = '#siteTable > div.thing'
+    content_selector = '//*[@id="siteTable"]/div[contains(@class, "thing")]'
 
 
 class RedditItemSet(scrapper.CrawlerItemSet):
     url = 'http://www.reddit.com/'
     base_url = 'http://www.reddit.com/'
     item_class = RedditEntries
-    next_selector = ('a', {'rel': 'next'})
+    next_selector = '//a[contains(@rel, "next")]/@href'
 
 
 def main():

@@ -1,6 +1,6 @@
 # scrapper
 scrapper is small, Python web scrapping library using 
-[BeautifulSoup4](http://www.crummy.com/software/BeautifulSoup/) and 
+[lxml](http://lxml.de/) and 
 [requests](http://docs.python-requests.org/en/latest/).
 
 
@@ -9,9 +9,7 @@ First start with ``CrawlerField``, it the one that define the data you are
 looking for, or more specific, it's select data from content using ``selector``
 defined by you. It takes three parameters:
 * ``selector`` - it's a XPath selector
-* ``callback`` - (optional) a function that will be fire on data
-* ``full_tag`` - (optional) tells if we want data with tag, i.e. 
-``<a href="http://example/">link</a>`` instead of ``link``
+* ``callback`` - (optional) a function that will be fired on data
 
 Class ``CrawlerField`` is used to define fields inside subclass of 
 ``CrawlerItem``:
@@ -26,7 +24,6 @@ class AmazonEntry(scrapper.CrawlerItem):
     img = scrapper.CrawlerField(
         '#imgTagWrapperId img.a-dynamic-image',
         get_image,
-        True,
     )
 ```
 
@@ -61,21 +58,17 @@ import scrapper
 
 
 class ImgurEntry(scrapper.CrawlerItem):
-    link = scrapper.CrawlerField(
-        'a.image-list-link',
-        lambda value, _, __: value['href'] if value else None,
-        True,
-    )
+    link = scrapper.CrawlerField('//a[@class="image-list-link"]/@href')
 
     description = scrapper.CrawlerField(
-        'a.hover > p',
+        '//a[@class="hover"]/p/text()',
         lambda value, _, __: value.strip() if value else None,
     )
 
 
 class ImgurEntryCollection(scrapper.CrawlerMultiItem):
     item_class = ImgurEntry
-    content_selector = 'div.cards > div.post'
+    content_selector = '//div[@class="cards"]/div[@class="post"]'
 
 
 for item in ImgurEntryCollection('http://imgur.com/'):
@@ -98,28 +91,25 @@ consists of string and dict, that are used to select
 ```python
 import scrapper
 
+
 class WykopEntry(scrapper.CrawlerItem):
     title = scrapper.CrawlerField(
-        'div.lcontrast > h2 > a',
+        '//div[contains(@class, "lcontrast")]/h2/a/text()',
         lambda value, content, response: value.strip() if value else None,
     )
-    link = scrapper.CrawlerField(
-        'div.lcontrast > h2 > a',
-        lambda value, content, response: value['href'] if value else None,
-        True,
-    )
+    link = scrapper.CrawlerField('//div[contains(@class, "lcontrast")]/h2/a/@href')
 
 
 class WykopEntries(scrapper.CrawlerMultiItem):
     item_class = WykopEntry
-    content_selector = '#itemsStream > li.link'
+    content_selector = '//*[@id="itemsStream"]//li[contains(@class, "link")]'
 
 
 class WykopItemSet(scrapper.CrawlerItemSet):
     url = 'http://www.wykop.pl/'
     base_url = 'http://www.wykop.pl/'
     item_class = WykopEntries
-    links_selector = 'a', {'class': 'button'},
+    links_selector = '//a[@class="button"]/@href'
 
 
 for item_set in WykopItemSet():
@@ -130,7 +120,7 @@ for item_set in WykopItemSet():
 
 
 See [/examples/](https://github.com/Alkemic/scrapper/tree/master/examples) for 
-simple usages.
+more simple usages.
 
 
 ## TODO

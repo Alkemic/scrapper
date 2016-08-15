@@ -5,8 +5,9 @@ import copy
 from datetime import datetime
 from time import sleep
 
+import lxml.html
+import lxml.etree
 import requests
-from bs4 import BeautifulSoup
 
 
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 ' \
@@ -57,17 +58,12 @@ def fetch_data(url):
         )
 
     fetch_data.last_run = datetime.now()
-
     return response
 
 
-def select_content(selector, content, response, full_tag=False, callback=None):
-    try:
-        value = content.select(selector)[0]
-        if not full_tag:
-            value = value.string
-    except IndexError:
-        value = None
+def select_content(selector, content, response, callback=None):
+    value = content.xpath(selector)
+    value = value[0] if value else None
 
     if callback:
         value = callback(value, content, response)
@@ -76,22 +72,20 @@ def select_content(selector, content, response, full_tag=False, callback=None):
 
 
 class CrawlerField(object):
-    def __init__(self, selector='', callback=None, full_tag=False):
+    def __init__(self, selector='', callback=None):
         if not selector:
             raise ValueError('You have to specify `selector`')
 
-        self.full_tag = full_tag
         self.selector = selector
         self.callback = callback
 
         self._value = None
 
     def __repr__(self):
-        return '%s(\'%s\', %s, %s)' % (
+        return '%s(\'%s\', %s)' % (
             self.__class__.__name__,
             self.selector,
             self.callback,
-            self.full_tag,
         )
 
     def __get__(self, instance, owner=None):
@@ -102,7 +96,7 @@ class CrawlerField(object):
 
     def process(self, content, response):
         self._value = select_content(
-            self.selector, content, response, self.full_tag, self.callback,
+            self.selector, content, response, self.callback,
         )
 
 
@@ -123,10 +117,10 @@ class CrawlerItem(object):
 
         if content is None:
             self._response = fetch_data(self._url)
-            self._content = BeautifulSoup(self._response.content, "html.parser")
+            self._content = lxml.html.fromstring(self._response.content)
         else:
             self._response = None
-            self._content = BeautifulSoup(content, "html.parser")
+            self._content = lxml.html.fromstring(content)
 
         for name, field in self.__dict__.items():
             if isinstance(field, CrawlerField):
@@ -176,9 +170,9 @@ class CrawlerMultiItem(object):
             self.content = content
 
     def __iter__(self):
-        soup = BeautifulSoup(self.content, "html.parser")
-        for content in soup.select(self.content_selector):
-            yield self.item_class(self.url, self, str(content))
+        parsed = lxml.html.fromstring(self.content)
+        for content in parsed.xpath(self.content_selector):
+            yield self.item_class(self.url, self, lxml.etree.tostring(content))
 
 
 class CrawlerItemSet(object):
@@ -201,14 +195,6 @@ class CrawlerItemSet(object):
                 'You should define either`links_selector` or `next_selector`'
             )
 
-        if self.links_selector is not None and \
-                not isinstance(self.links_selector, (tuple, list)):
-            self.links_selector = self.links_selector,
-
-        if self.next_selector is not None and \
-                not isinstance(self.next_selector, (tuple, list)):
-            self.next_selector = self.next_selector,
-
         if not self.item_class:
             raise ScrapperException('You need to setup `item_class`')
 
@@ -227,42 +213,43 @@ class CrawlerItemSet(object):
         self.content = self.response.content
 
     def next_link(self):
-        soup = BeautifulSoup(self.content, "html.parser")
+        parsed = lxml.html.fromstring(self.content)
 
         if self.next_selector:
             yield self.url
             while True:
-                selected_next = soup.find_all(*self.next_selector)
+                selected_next = parsed.xpath(self.next_selector)
                 if len(selected_next) == 0:
                     raise ScrapperCantFindNext(
                         'Couldn\'t find element by selector "{}"'.format(
                             self.next_selector,
                         )
                     )
-
-                next_link = selected_next[0]
-                next_url = next_link.attrs['href']
+		
+                next_url = selected_next[0]
                 if not REGEXP_LINK.match(next_url):
                     next_url = self.base_url + next_url
 
                 self.content = fetch_data(next_url).content
-                soup = BeautifulSoup(self.content, "html.parser")
+                parsed = lxml.html.fromstring(self.content)
 
                 yield next_url
 
         if self.links_selector:
-            selected_links = soup.find_all(*self.links_selector)
+            selected_links = parsed.xpath(self.links_selector)
+
             if len(selected_links) == 0:
                 raise ScrapperCantFindNext(
                     'Couldn\'t find element by selector "{}"'.format(
                         self.next_selector
                     )
                 )
+
             for link in selected_links:
-                if self.base_url in link.attrs['href']:
-                    link_url = link.attrs['href']
+                if self.base_url in link:
+                    link_url = link
                 else:
-                    link_url = self.base_url + link.attrs['href']
+                    link_url = self.base_url + link
 
                 yield link_url
 

@@ -8,7 +8,7 @@ import scrapper
 
 def get_image(value, content, response):
     try:
-        mapping = json.loads(value['data-a-dynamic-image'])
+        mapping = json.loads(value)
         mapping = {d[0] * d[1]: url for url, d in mapping.items()}
         return mapping[max(mapping.keys())]
     except (KeyError, ValueError, TypeError):
@@ -17,17 +17,16 @@ def get_image(value, content, response):
 
 class AmazonEntry(scrapper.CrawlerItem):
     title = scrapper.CrawlerField(
-        '#productTitle',
-        lambda value, content, response: value.strip(),
+        "//*[@id='productTitle']/text()",
+        lambda value, content, response: value.strip() if value else None,
     )
     price = scrapper.CrawlerField(
-        'div.feature span.a-color-price',
-        lambda value, _, __: value.strip(),
+        "//span[@class='a-color-price']/text()",
+        lambda value, _, __: value.strip() if value else None,
     )
     img = scrapper.CrawlerField(
-        '#imgTagWrapperId img.a-dynamic-image',
+        '//div[@id="imgTagWrapperId"]/img/@data-a-dynamic-image',
         get_image,
-        True,
     )
 
 

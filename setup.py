@@ -13,7 +13,7 @@ setup(
     py_modules=['scrapper'],
     keywords='scrapper,webscrapping',
     install_requires=[
-        'beautifulsoup4==4.4.1',
+        'lxml == 3.6.1',
         'requests == 2.5.1',
     ],
     classifiers=[
