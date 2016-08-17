@@ -4,26 +4,22 @@ import scrapper
 
 class WykopEntry(scrapper.CrawlerItem):
     title = scrapper.CrawlerField(
-        'div.lcontrast > h2 > a',
+        '//div[contains(@class, "lcontrast")]/h2/a/text()',
         lambda value, content, response: value.strip() if value else None,
     )
-    link = scrapper.CrawlerField(
-        'div.lcontrast > h2 > a',
-        lambda value, content, response: value['href'] if value else None,
-        True,
-    )
+    link = scrapper.CrawlerField('//div[contains(@class, "lcontrast")]/h2/a/@href')
 
 
 class WykopEntries(scrapper.CrawlerMultiItem):
     item_class = WykopEntry
-    content_selector = '#itemsStream > li.link'
+    content_selector = '//*[@id="itemsStream"]//li[contains(@class, "link")]'
 
 
 class WykopItemSet(scrapper.CrawlerItemSet):
     url = 'http://www.wykop.pl/'
     base_url = 'http://www.wykop.pl/'
     item_class = WykopEntries
-    links_selector = 'a', {'class': 'button'},
+    links_selector = '//a[@class="button"]/@href'
 
 
 i = 1
@@ -32,3 +28,4 @@ for item_set in WykopItemSet():
         print("page: %d, title: %s (%s)" % (i, item.title, item.link))
 
     i += 1
+

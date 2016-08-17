@@ -5,21 +5,14 @@ import scrapper
 
 
 class ImgurEntry(scrapper.CrawlerItem):
-    link = scrapper.CrawlerField(
-        'a.image-list-link',
-        lambda value, _, __: value['href'] if value else None,
-        True,
-    )
+    link = scrapper.CrawlerField('.//a[@class="image-list-link"]/@href')
 
-    description = scrapper.CrawlerField(
-        'a.hover > p',
-        lambda value, _, __: value.strip() if value else None,
-    )
+    description = scrapper.CrawlerField('.//div[@class="hover"]/p/text()')
 
 
 class ImgurEntryCollection(scrapper.CrawlerMultiItem):
     item_class = ImgurEntry
-    content_selector = 'div.cards > div.post'
+    content_selector = '//div[@class="cards"]/div[@class="post"]'
 
 
 for item in ImgurEntryCollection('http://imgur.com/'):
