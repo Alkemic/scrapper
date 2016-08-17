@@ -5,6 +5,11 @@ import copy
 from datetime import datetime
 from time import sleep
 
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
+
 import lxml.html
 import lxml.etree
 import requests
@@ -177,7 +182,6 @@ class CrawlerMultiItem(object):
 
 class CrawlerItemSet(object):
     url = None
-    base_url = None
 
     # iterates over this selection, to get items
     # string - css selector for select() method or tuple - css selector and
@@ -225,10 +229,10 @@ class CrawlerItemSet(object):
                             self.next_selector,
                         )
                     )
-		
+
                 next_url = selected_next[0]
                 if not REGEXP_LINK.match(next_url):
-                    next_url = self.base_url + next_url
+                    next_url = urljoin(self.url, next_url)
 
                 self.content = fetch_data(next_url).content
                 parsed = lxml.html.fromstring(self.content)
@@ -246,12 +250,7 @@ class CrawlerItemSet(object):
                 )
 
             for link in selected_links:
-                if self.base_url in link:
-                    link_url = link
-                else:
-                    link_url = self.base_url + link
-
-                yield link_url
+                yield urljoin(self.url, link)
 
     def __iter__(self):
         for next_link in self.next_link():

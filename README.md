@@ -83,7 +83,6 @@ Class ``CrawlerItemSet`` can be used when there is need to iterate over pages.
 When
 
 * ``url`` - starting url
-* ``base_url`` - base url for links that are relative
 * ``item_class`` - class that is used for
 * ``links_selector`` - XPath selector for links to pages that should be iterated
 over, usually this should point to ``a`` tags in paginator
@@ -109,7 +108,6 @@ class WykopEntries(scrapper.CrawlerMultiItem):
 
 class WykopItemSet(scrapper.CrawlerItemSet):
     url = 'http://www.wykop.pl/'
-    base_url = 'http://www.wykop.pl/'
     item_class = WykopEntries
     links_selector = '//a[@class="button"]/@href'
 
