@@ -15,16 +15,16 @@ def get_image(value, content, response):
         return None
 
 
-class AmazonEntry(scrapper.CrawlerItem):
-    title = scrapper.CrawlerField(
+class AmazonEntry(scrapper.Item):
+    title = scrapper.Field(
         "//*[@id='productTitle']/text()",
         lambda value, content, response: value.strip() if value else None,
     )
-    price = scrapper.CrawlerField(
+    price = scrapper.Field(
         "//span[@class='a-color-price']/text()",
         lambda value, _, __: value.strip() if value else None,
     )
-    img = scrapper.CrawlerField(
+    img = scrapper.Field(
         '//div[@id="imgTagWrapperId"]/img/@data-a-dynamic-image',
         get_image,
     )

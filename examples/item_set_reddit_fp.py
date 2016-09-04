@@ -4,20 +4,20 @@ from __future__ import print_function, unicode_literals
 import scrapper
 
 
-class RedditEntry(scrapper.CrawlerItem):
-    title = scrapper.CrawlerField(
+class RedditEntry(scrapper.Item):
+    title = scrapper.Field(
         '//p[@class="title"]/a/text()',
         lambda value, content, response: value.strip() if value else None,
     )
-    link = scrapper.CrawlerField('//p[@class="title"]/a/@href')
+    link = scrapper.Field('//p[@class="title"]/a/@href')
 
 
-class RedditEntries(scrapper.CrawlerMultiItem):
+class RedditEntries(scrapper.Pagination):
     item_class = RedditEntry
     content_selector = '//*[@id="siteTable"]/div[contains(@class, "thing")]'
 
 
-class RedditItemSet(scrapper.CrawlerItemSet):
+class RedditItemSet(scrapper.ItemSet):
     url = 'http://www.reddit.com/'
     base_url = 'http://www.reddit.com/'
     item_class = RedditEntries

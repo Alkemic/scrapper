@@ -2,20 +2,20 @@
 import scrapper
 
 
-class SearchEntry(scrapper.CrawlerItem):
-    title = scrapper.CrawlerField(
+class SearchEntry(scrapper.Item):
+    title = scrapper.Field(
         '//h3[@class="r"]/a/text()',
         lambda value, content, response: value.strip() if value else None,
     )
-    link = scrapper.CrawlerField('//h3[@class="r"]/a/@href')
+    link = scrapper.Field('//h3[@class="r"]/a/@href')
 
 
-class SearchEntryCollection(scrapper.CrawlerMultiItem):
+class SearchEntryCollection(scrapper.Pagination):
     item_class = SearchEntry
     content_selector = '//div[@class="srg"]/div[@class="g"]'
 
 
-class SearchPageItemSet(scrapper.CrawlerItemSet):
+class SearchPageItemSet(scrapper.ItemSet):
     url = 'https://www.google.pl/search?q=python'
     base_url = 'https://www.google.pl/'
     item_class = SearchEntryCollection

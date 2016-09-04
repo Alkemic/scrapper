@@ -76,7 +76,7 @@ def select_content(selector, content, response, callback=None):
     return value
 
 
-class CrawlerField(object):
+class Field(object):
     def __init__(self, selector='', callback=None):
         if not selector:
             raise ValueError('You have to specify `selector`')
@@ -105,15 +105,15 @@ class CrawlerField(object):
         )
 
 
-class CrawlerItem(object):
+class Item(object):
     def __new__(cls, *args, **kwargs):
         cls._base_fields = {}
 
         for attr_name, field in cls.__dict__.items():
-            if isinstance(field, CrawlerField):
+            if isinstance(field, Field):
                 cls._base_fields[attr_name] = field
 
-        return super(CrawlerItem, cls).__new__(cls)
+        return super(Item, cls).__new__(cls)
 
     def __init__(self, url, caller=None, content=None):
         self._caller = caller
@@ -128,29 +128,29 @@ class CrawlerItem(object):
             self._content = lxml.html.fromstring(content)
 
         for name, field in self.__dict__.items():
-            if isinstance(field, CrawlerField):
+            if isinstance(field, Field):
                 field.process(self._content, self._response)
 
     def __getattribute__(self, name):
         if not name.startswith('_') and name in self.__dict__:
             return self.__dict__[name].__get__(self)
 
-        return super(CrawlerItem, self).__getattribute__(name)
+        return super(Item, self).__getattribute__(name)
 
     def as_dict(self):
         return {
             name: getattr(self, name)
             for name, field
             in self.__dict__.items()
-            if isinstance(field, CrawlerField)
+            if isinstance(field, Field)
         }
 
 
-class CrawlerMultiItem(object):
+class Pagination(object):
     # iterates over items fetched by this selection in BS
     content_selector = None
 
-    # should be instance of CrawlerItem
+    # should be instance of Item
     item_class = None
 
     def __init__(self, url, caller=None, content=None):
@@ -160,9 +160,9 @@ class CrawlerMultiItem(object):
         if not self.item_class:
             raise ScrapperException('You need to setup `item_class`')
 
-        if not issubclass(self.item_class, (CrawlerItem, CrawlerMultiItem)):
+        if not issubclass(self.item_class, (Item, Pagination)):
             raise ScrapperException('`item_class` need to be instance of '
-                                    '`CrawlerItem` or `CrawlerMultiItem`')
+                                    '`Item` or `Pagination`')
 
         if not self.content_selector:
             raise ScrapperException('You need to define `content_selector`')
@@ -180,7 +180,7 @@ class CrawlerMultiItem(object):
             yield self.item_class(self.url, self, lxml.etree.tostring(content))
 
 
-class CrawlerItemSet(object):
+class ItemSet(object):
     url = None
 
     # iterates over this selection, to get items
@@ -202,10 +202,10 @@ class CrawlerItemSet(object):
         if not self.item_class:
             raise ScrapperException('You need to setup `item_class`')
 
-        if not issubclass(self.item_class, (CrawlerItem, CrawlerMultiItem)):
+        if not issubclass(self.item_class, (Item, Pagination)):
             raise ScrapperException(
-                '`item_class` need to be instance of `CrawlerItem` or '
-                '`CrawlerMultiItem`'
+                '`item_class` need to be instance of `Item` or '
+                '`Pagination`'
             )
 
         if not self.next_selector and not self.links_selector:
