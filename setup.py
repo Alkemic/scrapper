@@ -4,14 +4,14 @@ from setuptools import setup
 
 setup(
     name='Scrapper',
-    version='0.1.1',
+    version='0.8.0',
     url='https://github.com/Alkemic/scrapper',
     license='MIT',
     author='Daniel Alkemic Czuba',
     author_email='alkemic7@gmail.com',
-    description='Scrapper is small, Python web scrapping library',
+    description='Scrapper is small, Python web scraping library',
     py_modules=['scrapper'],
-    keywords='scrapper,webscrapping',
+    keywords='scrapper,scraping,webscraping',
     install_requires=[
         'lxml == 3.6.1',
         'requests == 2.5.1',

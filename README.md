@@ -82,11 +82,14 @@ for item in ImgurEntryCollection('http://imgur.com/'):
 Class ``CrawlerItemSet`` can be used when there is need to iterate over pages.
 When
 
-* ``url`` - starting url
-* ``item_class`` - class that is used for
+* ``url`` - starting url, on this page we will search for url addresses to
+process by scrapper
+* ``item_class`` - class that is used for actual processing of site, need to be
+instance of ``CrawlerItem`` or ``CrawlerMultiItem``
 * ``links_selector`` - XPath selector for links to pages that should be iterated
 over, usually this should point to ``a`` tags in paginator
-* ``next_selector`` - XPath selector for a next site
+* ``next_selector`` - XPath selector for selecting next site, will always select
+link from currently processed page
 
 
 ```python
@@ -98,7 +101,9 @@ class WykopEntry(scrapper.CrawlerItem):
         '//div[contains(@class, "lcontrast")]/h2/a/text()',
         lambda value, content, response: value.strip() if value else None,
     )
-    link = scrapper.CrawlerField('//div[contains(@class, "lcontrast")]/h2/a/@href')
+    link = scrapper.CrawlerField(
+        '//div[contains(@class, "lcontrast")]/h2/a/@href',
+    )
 
 
 class WykopEntries(scrapper.CrawlerMultiItem):
@@ -118,6 +123,17 @@ for item_set in WykopItemSet():
 
 ```
 
+#### Controlling iteration
+
+By default scrapper will go over pages selected by ``links_selector`` or select
+next link on currently processed page using
+
+Iteration over pages is done in ``next_link`` method. To manually control what
+pages should be processed you need to override this method. This method must
+yield single url, which is next page to crawl over.
+
+
+## Examples
 
 See [/examples/](https://github.com/Alkemic/scrapper/tree/master/examples) for
 more simple usages.
