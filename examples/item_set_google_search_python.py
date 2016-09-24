@@ -10,12 +10,12 @@ class SearchEntry(scrapper.Item):
     link = scrapper.Field('//h3[@class="r"]/a/@href')
 
 
-class SearchEntryCollection(scrapper.Pagination):
+class SearchEntryCollection(scrapper.ItemSet):
     item_class = SearchEntry
     content_selector = '//div[@class="srg"]/div[@class="g"]'
 
 
-class SearchPageItemSet(scrapper.ItemSet):
+class SearchPageItemSet(scrapper.Pagination):
     url = 'https://www.google.pl/search?q=python'
     base_url = 'https://www.google.pl/'
     item_class = SearchEntryCollection

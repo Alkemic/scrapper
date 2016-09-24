@@ -47,7 +47,7 @@ print 'title: %s\nprice: %s\nimg:%s' % (
 
 ### Repetitions on site
 When there is more than one occurrence of data set you are looking for you, then
-you should use ``Pagination``. It's designed to look for repetitions in
+you should use ``ItemSet``. It's designed to look for repetitions in
 content.
 When creating a class, you have to setup two attributes:
 * ``content_selector`` - it's selector, that we are going to iterate over
@@ -69,17 +69,17 @@ class ImgurEntry(scrapper.Item):
     )
 
 
-class ImgurEntryCollection(scrapper.Pagination):
+class ImgurEntryItemSet(scrapper.ItemSet):
     item_class = ImgurEntry
     content_selector = '//div[@class="cards"]/div[@class="post"]'
 
 
-for item in ImgurEntryCollection('http://imgur.com/'):
+for item in ImgurEntryItemSet('http://imgur.com/'):
     print("url: %s; %s" % (item.link, item.description))
 ```
 
 ### Crwaling over pages on site
-Class ``ItemSet`` can be used when there is need to iterate over pages.
+Class ``Pagination`` can be used when there is need to iterate over pages.
 When
 
 * ``url`` - starting url, on this page we will search for url addresses to
@@ -106,18 +106,18 @@ class WykopEntry(scrapper.Item):
     )
 
 
-class WykopEntries(scrapper.Pagination):
+class WykopEntries(scrapper.ItemSet):
     item_class = WykopEntry
     content_selector = '//*[@id="itemsStream"]//li[contains(@class, "link")]'
 
 
-class WykopItemSet(scrapper.ItemSet):
+class WykopPagination(scrapper.Pagination):
     url = 'http://www.wykop.pl/'
     item_class = WykopEntries
     links_selector = '//a[@class="button"]/@href'
 
 
-for item_set in WykopItemSet():
+for item_set in WykopPagination():
     for item in item_set:
         print "title: %s (%s)" % (item.title, item.link))
 

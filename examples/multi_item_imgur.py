@@ -10,10 +10,10 @@ class ImgurEntry(scrapper.Item):
     description = scrapper.Field('.//div[@class="hover"]/p/text()')
 
 
-class ImgurEntryCollection(scrapper.Pagination):
+class ImgurItemSet(scrapper.ItemSet):
     item_class = ImgurEntry
     content_selector = '//div[@class="cards"]/div[@class="post"]'
 
 
-for item in ImgurEntryCollection('http://imgur.com/'):
+for item in ImgurItemSet('http://imgur.com/'):
     print("url: %s; %s" % (item.link, item.description))

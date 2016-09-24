@@ -12,12 +12,12 @@ class RedditEntry(scrapper.Item):
     link = scrapper.Field('//p[@class="title"]/a/@href')
 
 
-class RedditEntries(scrapper.Pagination):
+class RedditEntries(scrapper.ItemSet):
     item_class = RedditEntry
     content_selector = '//*[@id="siteTable"]/div[contains(@class, "thing")]'
 
 
-class RedditItemSet(scrapper.ItemSet):
+class RedditItemSet(scrapper.Pagination):
     url = 'http://www.reddit.com/'
     base_url = 'http://www.reddit.com/'
     item_class = RedditEntries

@@ -146,7 +146,7 @@ class Item(object):
         }
 
 
-class Pagination(object):
+class ItemSet(object):
     # iterates over items fetched by this selection in BS
     content_selector = None
 
@@ -160,7 +160,7 @@ class Pagination(object):
         if not self.item_class:
             raise ScrapperException('You need to setup `item_class`')
 
-        if not issubclass(self.item_class, (Item, Pagination)):
+        if not issubclass(self.item_class, (Item, ItemSet)):
             raise ScrapperException('`item_class` need to be instance of '
                                     '`Item` or `Pagination`')
 
@@ -180,7 +180,7 @@ class Pagination(object):
             yield self.item_class(self.url, self, lxml.etree.tostring(content))
 
 
-class ItemSet(object):
+class Pagination(object):
     url = None
 
     # iterates over this selection, to get items
@@ -202,7 +202,7 @@ class ItemSet(object):
         if not self.item_class:
             raise ScrapperException('You need to setup `item_class`')
 
-        if not issubclass(self.item_class, (Item, Pagination)):
+        if not issubclass(self.item_class, (Item, ItemSet)):
             raise ScrapperException(
                 '`item_class` need to be instance of `Item` or '
                 '`Pagination`'

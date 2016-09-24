@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='Scrapper',
-    version='0.9.0',
+    version='0.9.1',
     url='https://github.com/Alkemic/scrapper',
     license='MIT',
     author='Daniel Alkemic Czuba',

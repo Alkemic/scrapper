@@ -202,34 +202,34 @@ class TestPagination(BaseTestCase):
         ])
 
 
-class TestItemSet(BaseTestCase):
+class TestPagination(BaseTestCase):
     def test_raises_exception(self):
         with self.assertRaises(scrapper.ScrapperException):
-            scrapper.ItemSet()
+            scrapper.Pagination()
 
-        class TestItemSet(scrapper.ItemSet):
+        class TestItemSet(scrapper.Pagination):
             item_class = object
 
         with self.assertRaises(scrapper.ScrapperException):
             TestItemSet()
 
-        class TestItemSet(scrapper.ItemSet):
+        class TestPagination(scrapper.Pagination):
             item_class = scrapper.Item
 
         with self.assertRaises(scrapper.ScrapperException):
-            TestItemSet()
+            TestPagination()
 
     def test_initialisation(self):
         class TestCrawlerClass(scrapper.Item):
             title = scrapper.Field('//h1/text()')
 
-        class TestItemSet(scrapper.ItemSet):
+        class TestPagination(scrapper.Pagination):
             base_url = ''
             url = 'page_index.html'
             item_class = TestCrawlerClass
             links_selector = '//a/@href'
 
-        item_set = TestItemSet()
+        item_set = TestPagination()
         items = [item for item in item_set]
 
         self.assertEqual(len(items), 3)
