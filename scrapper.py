@@ -68,7 +68,8 @@ def fetch_data(url):
 
 def select_content(selector, content, response, callback=None):
     value = content.xpath(selector)
-    value = value[0] if value else None
+    value = value[0] if isinstance(value, list) and len(value) else value
+    value = value if value else None    
 
     if callback:
         value = callback(value, content, response)
