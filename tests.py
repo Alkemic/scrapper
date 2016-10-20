@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import copy
 import unittest
 from mock import patch
@@ -13,15 +11,16 @@ import scrapper
 
 def monkey_patch_requests_get():
     def monkey_patch_get(uri, *args, **kwargs):
-        extra_dict = {
-            'content': open('./fixtures/%s' % uri).read(),
-            'status_code': 200,
-        }
+        with open('./fixtures/%s' % uri) as fh:
+            extra_dict = {
+                'content': fh.read(),
+                'status_code': 200,
+            }
 
         return type(
             str('mocked_requests'),
             (object,),
-            extra_dict
+            extra_dict,
         )()
 
     setattr(requests, 'get', monkey_patch_get)
@@ -130,7 +129,8 @@ class TestItem(BaseTestCase):
         with patch('requests.get') as mock:
             mocked_get = mock.return_value
             mocked_get.status_code = 200
-            mocked_get.content = open('./fixtures/single_entry.html').read()
+            with open('./fixtures/single_entry.html') as fh:
+                mocked_get.content = fh.read()
 
             crawler_item = TestCrawlerClass('http://dummy.org')
 
@@ -150,10 +150,10 @@ class TestItem(BaseTestCase):
         self.assertEqual(
             crawler_item.as_dict(),
             {
-                'author_email': u'author@example',
-                'content': u'Lorem ipsum',
-                'title': u'Title',
-                'author': u'Author field',
+                'author_email': 'author@example',
+                'content': 'Lorem ipsum',
+                'title': 'Title',
+                'author': 'Author field',
             },
         )
 
@@ -161,25 +161,25 @@ class TestItem(BaseTestCase):
 class TestPagination(BaseTestCase):
     def test_should_throw_exception(self):
         with self.assertRaises(scrapper.ScrapperException):
-            scrapper.Pagination(None)
+            scrapper.Pagination()
 
         class TestClassPagination(scrapper.Pagination):
             pass
 
         with self.assertRaises(scrapper.ScrapperException):
-            TestClassPagination(None)
+            TestClassPagination()
 
         class TestClassPagination(scrapper.Pagination):
             item_class = scrapper.Item
 
         with self.assertRaises(scrapper.ScrapperException):
-            TestClassPagination(None)
+            TestClassPagination()
 
         class TestClassPagination(scrapper.Pagination):
             item_class = object
 
         with self.assertRaises(scrapper.ScrapperException):
-            TestClassPagination(None)
+            TestClassPagination()
 
     def test_creation(self):
         class TestClassItem(scrapper.Item):

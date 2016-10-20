@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import re
 import copy
 from datetime import datetime
@@ -68,8 +66,8 @@ def fetch_data(url):
 
 def select_content(selector, content, response, callback=None):
     value = content.xpath(selector)
-    value = value[0] if isinstance(value, list) and len(value) else value
-    value = value if value else None
+    if isinstance(value, list):
+        value = value[0] if len(value) else None
 
     if callback:
         value = callback(value, content, response)
