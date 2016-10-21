@@ -1,5 +1,5 @@
 # scrapper
-scrapper is small, Python web scrapping library using
+scrapper is small, Python 3.3+ web scrapping library using
 [lxml](http://lxml.de/) and
 [requests](http://docs.python-requests.org/en/latest/).
 
