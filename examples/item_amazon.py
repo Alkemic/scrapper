@@ -4,7 +4,7 @@ import json
 import scrapper
 
 
-def get_image(value, content, response):
+def get_image(value, _, __):
     try:
         mapping = json.loads(value)
         mapping = {d[0] * d[1]: url for url, d in mapping.items()}

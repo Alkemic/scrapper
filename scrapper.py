@@ -105,7 +105,7 @@ class Field(object):
 
 
 class Item(object):
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *_, **__):
         cls._base_fields = {}
 
         for attr_name, field in cls.__dict__.items():
@@ -126,7 +126,7 @@ class Item(object):
             self._response = None
             self._content = lxml.html.fromstring(content)
 
-        for name, field in self.__dict__.items():
+        for _, field in self.__dict__.items():
             if isinstance(field, Field):
                 field.process(self._content, self._response)
 
@@ -176,6 +176,7 @@ class ItemSet(object):
     def __iter__(self):
         parsed = lxml.html.fromstring(self.content)
         for content in parsed.xpath(self.content_selector):
+            # pylint: disable=not-callable
             yield self.item_class(self.url, self, lxml.etree.tostring(content))
 
 
@@ -253,4 +254,5 @@ class Pagination(object):
 
     def __iter__(self):
         for next_link in self.next_link():
+            # pylint: disable=not-callable
             yield self.item_class(next_link, self)
