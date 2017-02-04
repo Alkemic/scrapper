@@ -20,3 +20,13 @@ script:
 
 after_success:
   - coveralls
+
+deploy:
+  provider: pypi
+  user: Alkemic
+  password:
+    secure: aYk3zzbMS1i3fh/7DA7XvlIf7pfoTaR9GW4ymxyYTovUR5s311YRAwTha6ciy/BYSINMgDNXUtCudRDYPsViZMfLF8KKlEnd6A13sHvucZpDHUBqMlTYy75bp5n5Otem6Cu47wBbDpZouRzafQ6LObkqra4mAVcMssxPVIzsbjA=
+  on:
+    branch: master
+    distributions: sdist bdist_wheel
+    repo: Alkemic/scrapper
