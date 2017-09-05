@@ -1,17 +1,12 @@
-import re
 import copy
+import re
 from datetime import datetime
 from time import sleep
+from urllib.parse import urljoin
 
-try:
-    from urlparse import urljoin
-except ImportError:
-    from urllib.parse import urljoin
-
-import lxml.html
 import lxml.etree
+import lxml.html
 import requests
-
 
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 ' \
              '(KHTML, like Gecko) Chrome/40.0.2214.111 Safari/537.36'
