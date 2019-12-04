@@ -14,7 +14,7 @@ setup(
     keywords='scrapper,scraping,webscraping',
     install_requires=[
         'lxml == 3.6.1',
-        'requests == 2.5.1',
+        'requests == 2.20.0',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
