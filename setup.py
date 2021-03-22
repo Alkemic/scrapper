@@ -13,7 +13,7 @@ setup(
     py_modules=['scrapper'],
     keywords='scrapper,scraping,webscraping',
     install_requires=[
-        'lxml == 3.6.1',
+        'lxml == 4.6.3',
         'requests == 2.20.0',
     ],
     classifiers=[
